@@ -15,8 +15,10 @@ scalacOptions := Seq(
 val gatlingVersion = "3.6.1"
 
 libraryDependencies ++= Seq(
-  "io.gatling.highcharts"         % "gatling-charts-highcharts"      % gatlingVersion,
-  "io.gatling"                    % "gatling-core"                   % gatlingVersion
+  "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion % "provided",
+  "io.gatling"            % "gatling-core"              % gatlingVersion % "provided"
 )
+
+assembly / assemblyOption ~= { _.withIncludeScala(false) }
 
 enablePlugins(GatlingPlugin)
