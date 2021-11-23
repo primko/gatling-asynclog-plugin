@@ -5,24 +5,19 @@ import io.gatling.core.session.Expression
 import io.gatling.core.session.ExpressionSuccessWrapper
 import io.gatling.core.session.ExpressionFailureWrapper
 
-case class AsynclogAttributes(
-                               requestName: Expression[String],
-
-                               startTimestamp: Option[Expression[Long]],
-                               startTimestampDate: Option[Expression[java.util.Date]],
-                               startTimestampString: Option[Expression[String]],
-                               startTimestampStringFormat: Option[Expression[String]],
-
-                               endTimestamp: Option[Expression[Long]],
-                               endTimestampDate: Option[Expression[java.util.Date]],
-                               endTimestampString: Option[Expression[String]],
-                               endTimestampStringFormat: Option[Expression[String]],
-
-                               status: Option[Expression[Status]],
-                               responseCode: Option[Expression[String]],
-                               message: Option[Expression[String]],
-                               maxDuration: Option[Expression[Long]]
-                             )
+case class AsynclogAttributes(requestName: Expression[String],
+                              startTimestamp: Option[Expression[Long]],
+                              startTimestampDate: Option[Expression[java.util.Date]],
+                              startTimestampString: Option[Expression[String]],
+                              startTimestampStringFormat: Option[Expression[String]],
+                              endTimestamp: Option[Expression[Long]],
+                              endTimestampDate: Option[Expression[java.util.Date]],
+                              endTimestampString: Option[Expression[String]],
+                              endTimestampStringFormat: Option[Expression[String]],
+                              status: Option[Expression[Status]],
+                              responseCode: Option[Expression[String]],
+                              message: Option[Expression[String]],
+                              maxDuration: Option[Expression[Long]])
 
 object AsynclogAttributes {
 
@@ -48,7 +43,7 @@ object AsynclogAttributes {
     initAttributes
   }
 
-  def initStartTimestamp() : AsynclogAttributes = {
+  def initStartTimestamp(): AsynclogAttributes = {
 
     val startAttributes = AsynclogAttributes(
       requestName = "".expressionSuccess,
