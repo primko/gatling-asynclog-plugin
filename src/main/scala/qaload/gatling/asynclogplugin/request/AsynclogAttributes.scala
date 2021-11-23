@@ -1,9 +1,7 @@
 package qaload.gatling.asynclogplugin.request
 
 import io.gatling.commons.stats.Status
-import io.gatling.core.session.Expression
-import io.gatling.core.session.ExpressionSuccessWrapper
-import io.gatling.core.session.ExpressionFailureWrapper
+import io.gatling.core.session.{Expression, ExpressionSuccessWrapper}
 
 case class AsynclogAttributes(requestName: Expression[String],
                               startTimestamp: Option[Expression[Long]],
@@ -21,48 +19,37 @@ case class AsynclogAttributes(requestName: Expression[String],
 
 object AsynclogAttributes {
 
-  def init(): AsynclogAttributes = {
-    val initAttributes = AsynclogAttributes(
+  def init(): AsynclogAttributes =
+    AsynclogAttributes(
       requestName = "".expressionSuccess,
-
       startTimestamp = None,
       startTimestampDate = None,
       startTimestampString = None,
       startTimestampStringFormat = None,
-
       endTimestamp = None,
       endTimestampDate = None,
       endTimestampString = None,
       endTimestampStringFormat = None,
-
       status = None,
       responseCode = None,
       message = None,
       maxDuration = None
     )
-    initAttributes
-  }
 
-  def initStartTimestamp(): AsynclogAttributes = {
-
-    val startAttributes = AsynclogAttributes(
+  def initStartTimestamp(): AsynclogAttributes =
+    AsynclogAttributes(
       requestName = "".expressionSuccess,
-
       startTimestamp = Some(System.currentTimeMillis.expressionSuccess),
       startTimestampDate = None,
       startTimestampString = None,
       startTimestampStringFormat = None,
-
       endTimestamp = None,
       endTimestampDate = None,
       endTimestampString = None,
       endTimestampStringFormat = None,
-
       status = None,
       responseCode = None,
       message = None,
       maxDuration = None
     )
-    startAttributes
-  }
 }

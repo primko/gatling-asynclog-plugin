@@ -1,64 +1,57 @@
 package qaload.gatling.asynclogplugin.action
 
-import io.gatling.core.action.Action
-import io.gatling.core.action.builder.ActionBuilder
-import io.gatling.core.structure.ScenarioContext
 import com.softwaremill.quicklens._
 import io.gatling.commons.stats.Status
+import io.gatling.core.action.Action
+import io.gatling.core.action.builder.ActionBuilder
 import io.gatling.core.session.{Expression, _}
+import io.gatling.core.structure.ScenarioContext
 import qaload.gatling.asynclogplugin.request.AsynclogAttributes
 
-case class LogActionBuilder (
-                              attributes: AsynclogAttributes
-                            ) extends ActionBuilder {
+case class LogActionBuilder(attributes: AsynclogAttributes) extends ActionBuilder {
 
-  def requestName(requestName: Expression[String]) =
+  def requestName(requestName: Expression[String]): LogActionBuilder =
     this.modify(_.attributes.requestName).setTo(requestName)
 
-
-  def startTimestamp(startTimestamp: Expression[Long]) =
+  def startTimestamp(startTimestamp: Expression[Long]): LogActionBuilder =
     this.modify(_.attributes.startTimestamp).setTo(Some(startTimestamp))
 
-  def startDate(startDate: Expression[java.util.Date]) =
+  def startDate(startDate: Expression[java.util.Date]): LogActionBuilder =
     this.modify(_.attributes.startTimestampDate).setTo(Some(startDate))
 
-  def startTimestamp(startTime: Expression[String], format: Expression[String]) =
+  def startTimestamp(startTime: Expression[String], format: Expression[String]): LogActionBuilder =
     this
-      .modify(_.attributes.startTimestampString).setTo(Some(startTime))
-      .modify(_.attributes.startTimestampStringFormat).setTo(Some(format))
+      .modify(_.attributes.startTimestampString)
+      .setTo(Some(startTime))
+      .modify(_.attributes.startTimestampStringFormat)
+      .setTo(Some(format))
 
-
-  def endTimestamp(endTimestamp: Expression[Long]) =
+  def endTimestamp(endTimestamp: Expression[Long]): LogActionBuilder =
     this.modify(_.attributes.endTimestamp).setTo(Some(endTimestamp))
 
-  def endDate(endDate: Expression[java.util.Date]) =
+  def endDate(endDate: Expression[java.util.Date]): LogActionBuilder =
     this.modify(_.attributes.endTimestampDate).setTo(Some(endDate))
 
-  def endTimestamp(endTime: Expression[String], format: Expression[String]) =
+  def endTimestamp(endTime: Expression[String], format: Expression[String]): LogActionBuilder =
     this
-      .modify(_.attributes.endTimestampString).setTo(Some(endTime))
-      .modify(_.attributes.endTimestampStringFormat).setTo(Some(format))
+      .modify(_.attributes.endTimestampString)
+      .setTo(Some(endTime))
+      .modify(_.attributes.endTimestampStringFormat)
+      .setTo(Some(format))
 
-
-  def status(status: Status) =
+  def status(status: Status): LogActionBuilder =
     this.modify(_.attributes.status).setTo(Some(status.expressionSuccess))
 
-  def status(status: Expression[Status]) =
+  def status(status: Expression[Status]): LogActionBuilder =
     this.modify(_.attributes.status).setTo(Some(status))
 
-  def responseCode(responseCode: Expression[String]) =
+  def responseCode(responseCode: Expression[String]): LogActionBuilder =
     this.modify(_.attributes.responseCode).setTo(Some(responseCode))
 
-  def message(message: Expression[String]) =
+  def message(message: Expression[String]): LogActionBuilder =
     this.modify(_.attributes.message).setTo(Some(message))
 
-
-  override def build(
-                      ctx: ScenarioContext,
-                      next: Action
-                    ): Action = {
-
+  override def build(ctx: ScenarioContext, next: Action): Action = {
     LogAction(attributes, ctx.coreComponents.statsEngine, next)
   }
-
 }
