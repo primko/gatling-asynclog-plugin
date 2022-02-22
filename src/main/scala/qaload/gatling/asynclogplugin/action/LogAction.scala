@@ -13,7 +13,8 @@ import java.text.SimpleDateFormat
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class LogAction(attributes: AsynclogAttributes, statsEngine: StatsEngine, next: Action) extends Action with NameGen {
+case class LogAction(attributes: AsynclogAttributes, statsEngine: StatsEngine, next: Action)
+    extends Action with NameGen with ChainableAction {
 
   override def name: String = genName("AsynclogRequest")
 
@@ -97,55 +98,56 @@ case class LogAction(attributes: AsynclogAttributes, statsEngine: StatsEngine, n
   }
 
   override def execute(session: Session): Unit = {
+    recover(session) {
+      attributes.requestName(session).map { resolvedRequestName =>
+        val resolvedAttributes: Future[ResolvedAttributes] =
+          Future {
+            val resolvedStartTimestamp = getTime(session,
+                                                 attributes.startTimestamp,
+                                                 attributes.startTimestampDate,
+                                                 attributes.startTimestampString,
+                                                 attributes.startTimestampStringFormat)
 
-    val resolvedAttributes: Future[ResolvedAttributes] =
-      Future {
-        val resolvedRequestName = resolve(attributes.requestName, session)
+            val resolvedEndTimestamp = getTime(session,
+                                               attributes.endTimestamp,
+                                               attributes.endTimestampDate,
+                                               attributes.endTimestampString,
+                                               attributes.endTimestampStringFormat)
 
-        val resolvedStartTimestamp = getTime(session,
-                                             attributes.startTimestamp,
-                                             attributes.startTimestampDate,
-                                             attributes.startTimestampString,
-                                             attributes.startTimestampStringFormat)
+            val resolvedStatus       = resolve(attributes.status, session, OK)
+            val resolvedResponseCode = tryResolve(attributes.responseCode, session)
+            val resolvedMessage      = tryResolve(attributes.message, session)
 
-        val resolvedEndTimestamp = getTime(session,
-                                           attributes.endTimestamp,
-                                           attributes.endTimestampDate,
-                                           attributes.endTimestampString,
-                                           attributes.endTimestampStringFormat)
+            ResolvedAttributes(
+              resolvedRequestName,
+              resolvedStartTimestamp,
+              resolvedEndTimestamp,
+              resolvedStatus,
+              resolvedResponseCode,
+              resolvedMessage
+            )
+          }
 
-        val resolvedStatus       = resolve(attributes.status, session, OK)
-        val resolvedResponseCode = tryResolve(attributes.responseCode, session)
-        val resolvedMessage      = tryResolve(attributes.message, session)
-
-        ResolvedAttributes(
-          resolvedRequestName,
-          resolvedStartTimestamp,
-          resolvedEndTimestamp,
-          resolvedStatus,
-          resolvedResponseCode,
-          resolvedMessage
-        )
+        resolvedAttributes onComplete {
+          case scala.util.Success(attr) =>
+            next ! {
+              statsEngine.logResponse(session.scenario,
+                                      session.groups,
+                                      attr.requestName,
+                                      attr.startTimestamp,
+                                      attr.endTimestamp,
+                                      attr.status,
+                                      attr.responseCode,
+                                      attr.message)
+              session
+            }
+          case scala.util.Failure(t) =>
+            next ! {
+              statsEngine.logCrash(session.scenario, session.groups, resolvedRequestName, t.getMessage)
+              session.markAsFailed
+            }
+        }
       }
-
-    resolvedAttributes onComplete {
-      case scala.util.Success(attr) =>
-        next ! {
-          statsEngine.logResponse(session.scenario,
-                                  session.groups,
-                                  attr.requestName,
-                                  attr.startTimestamp,
-                                  attr.endTimestamp,
-                                  attr.status,
-                                  attr.responseCode,
-                                  attr.message)
-          session
-        }
-      case scala.util.Failure(t) =>
-        next ! {
-          statsEngine.logCrash(session.scenario, session.groups, name, t.getMessage)
-          session.markAsFailed
-        }
     }
   }
 }
